@@ -1,0 +1,27 @@
+```
+# Compiled and build artifacts
+*.class
+target/
+
+# Dependencies
+.m2/
+.gradle/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Editors
+.vscode/
+.idea/
+
+# Maven specific
+*.jar
+*.war
+*.ear
+!*.jar
+!*.war
+!*.ear
+
+# Original rules preserved
+```
