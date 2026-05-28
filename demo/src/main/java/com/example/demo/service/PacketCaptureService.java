@@ -50,14 +50,26 @@ public class PacketCaptureService {
         if (running) return;
 
         PcapNetworkInterface nif;
-        try {
-            nif = Pcaps.getDevByName(deviceName);
-        } catch (PcapNativeException e) {
+        if (deviceName == null || deviceName.trim().isEmpty()) {
+            // If no device name provided, get the first available interface
             List<PcapNetworkInterface> allDevs = Pcaps.findAllDevs();
             if (allDevs.isEmpty()) {
                 throw new PcapNativeException("No network interfaces found");
             }
             nif = allDevs.get(0);
+            System.out.println("Using default network interface: " + nif.getName() + " (" + nif.getDescription() + ")");
+        } else {
+            try {
+                nif = Pcaps.getDevByName(deviceName);
+            } catch (PcapNativeException e) {
+                // If specified device not found, fall back to first available
+                List<PcapNetworkInterface> allDevs = Pcaps.findAllDevs();
+                if (allDevs.isEmpty()) {
+                    throw new PcapNativeException("No network interfaces found");
+                }
+                nif = allDevs.get(0);
+                System.out.println("Device '" + deviceName + "' not found, using: " + nif.getName());
+            }
         }
 
         String bpfFilter = "ip";
