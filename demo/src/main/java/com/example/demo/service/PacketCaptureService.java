@@ -13,6 +13,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import static org.pcap4j.core.BpfProgram.BpfCompileMode.OPTIMIZE;
+
 public class PacketCaptureService {
 
     private final AtomicInteger incomingCount = new AtomicInteger(0);
@@ -66,8 +68,7 @@ public class PacketCaptureService {
                 .timeoutMillis(10);
 
         pcapHandle = handleBuilder.build();
-        BpfProgram bpfProgram = new BpfProgram(bpfFilter);
-        pcapHandle.setFilter(bpfProgram);
+        pcapHandle.setFilter(bpfFilter, OPTIMIZE);
         running = true;
         
         executor = Executors.newSingleThreadExecutor();
@@ -99,7 +100,11 @@ public class PacketCaptureService {
     public void stopCapture() {
         running = false;
         if (pcapHandle != null) {
-            pcapHandle.breakLoop();
+            try {
+                pcapHandle.breakLoop();
+            } catch (NotOpenException e) {
+                // Ignore if already closed
+            }
             pcapHandle.close();
         }
         if (executor != null) {
